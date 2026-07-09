@@ -1,0 +1,93 @@
+{% extends "dashboard_base.html" %}
+
+{% block title %}Radiology{% endblock %}
+{% block dashboard_active %}active{% endblock %}
+{% block dashboard_url %}{{ url_for('radiology.dashboard') }}{% endblock %}
+
+{% block role_menu %}
+<div class="menu-header">Imaging</div>
+<a class="nav-link" href="{{ url_for('radiology.orders') }}"><i class="bi bi-list-check"></i><span>Orders</span></a>
+<a class="nav-link" href="{{ url_for('radiology.studies') }}"><i class="bi bi-images"></i><span>Studies</span></a>
+<a class="nav-link" href="{{ url_for('radiology.procedures') }}"><i class="bi bi-collection"></i><span>Procedures</span></a>
+<div class="menu-header">Tools</div>
+<a class="nav-link" href="#"><i class="bi bi-robot"></i><span>AI Radiology Assistant</span></a>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div><h4 class="mb-1">Radiology Dashboard</h4><p class="text-muted mb-0">Medical imaging management</p></div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="dashboard-card stat-card warning">
+            <div class="d-flex align-items-center gap-3">
+                <div class="stat-icon warning"><i class="bi bi-images"></i></div>
+                <div><h3 class="stat-value">{{ pending_studies }}</h3><p class="stat-label">Pending Studies</p></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="dashboard-card stat-card info">
+            <div class="d-flex align-items-center gap-3">
+                <div class="stat-icon info"><i class="bi bi-file-text"></i></div>
+                <div><h3 class="stat-value">{{ reporting_queue }}</h3><p class="stat-label">Reporting Queue</p></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="dashboard-card stat-card danger">
+            <div class="d-flex align-items-center gap-3">
+                <div class="stat-icon danger"><i class="bi bi-exclamation-triangle"></i></div>
+                <div><h3 class="stat-value">{{ critical_findings }}</h3><p class="stat-label">Critical Findings</p></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-8">
+        <div class="dashboard-card">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center py-3 px-4 border-bottom">
+                <h6 class="mb-0"><i class="bi bi-list-check me-2 text-primary"></i>Recent Orders</h6>
+                <a href="{{ url_for('radiology.orders') }}" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table data-table mb-0">
+                        <thead><tr><th>Order #</th><th>Patient</th><th>Type</th><th>Priority</th><th>Status</th></tr></thead>
+                        <tbody>
+                            {% for order in recent_orders %}
+                            <tr>
+                                <td>{{ order.order_number }}</td>
+                                <td>{{ order.patient.get_full_name() }}</td>
+                                <td>{{ order.items[0].procedure.name if order.items else '-' }}</td>
+                                <td><span class="badge bg-{{ 'danger' if order.priority == 'stat' else 'warning' if order.priority == 'urgent' else 'info' }}">{{ order.priority|title }}</span></td>
+                                <td><span class="badge bg-secondary">{{ order.status|title }}</span></td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="5" class="text-center py-4 text-muted">No recent orders</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="dashboard-card">
+            <div class="card-header bg-white py-3 px-4 border-bottom">
+                <h6 class="mb-0"><i class="bi bi-robot me-2 text-primary"></i>AI Radiology Assistant</h6>
+            </div>
+            <div class="card-body">
+                <div class="ai-placeholder">
+                    <i class="bi bi-cpu"></i>
+                    <h6>AI Image Analysis</h6>
+                    <p class="text-muted small">Automated detection, measurement, and preliminary reporting.</p>
+                    <span class="badge bg-primary">Coming Soon</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

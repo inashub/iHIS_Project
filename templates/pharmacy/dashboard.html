@@ -1,0 +1,94 @@
+{% extends "dashboard_base.html" %}
+
+{% block title %}Pharmacy{% endblock %}
+{% block dashboard_active %}active{% endblock %}
+{% block dashboard_url %}{{ url_for('pharmacy.dashboard') }}{% endblock %}
+
+{% block role_menu %}
+<div class="menu-header">Pharmacy</div>
+<a class="nav-link" href="{{ url_for('pharmacy.prescriptions') }}"><i class="bi bi-file-text"></i><span>Prescriptions</span></a>
+<a class="nav-link" href="{{ url_for('pharmacy.inventory') }}"><i class="bi bi-box-seam"></i><span>Inventory</span></a>
+<a class="nav-link" href="{{ url_for('pharmacy.refills') }}"><i class="bi bi-arrow-repeat"></i><span>Refill Requests</span></a>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div><h4 class="mb-1">Pharmacy Dashboard</h4><p class="text-muted mb-0">Dispensing and inventory management</p></div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="dashboard-card stat-card warning">
+            <div class="d-flex align-items-center gap-3">
+                <div class="stat-icon warning"><i class="bi bi-file-text"></i></div>
+                <div><h3 class="stat-value">{{ pending_prescriptions }}</h3><p class="stat-label">Pending Prescriptions</p></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="dashboard-card stat-card danger">
+            <div class="d-flex align-items-center gap-3">
+                <div class="stat-icon danger"><i class="bi bi-exclamation-triangle"></i></div>
+                <div><h3 class="stat-value">{{ low_stock }}</h3><p class="stat-label">Low Stock Items</p></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="dashboard-card stat-card success">
+            <div class="d-flex align-items-center gap-3">
+                <div class="stat-icon success"><i class="bi bi-check-circle"></i></div>
+                <div><h3 class="stat-value">{{ dispensed_today }}</h3><p class="stat-label">Dispensed Today</p></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-8">
+        <div class="dashboard-card">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center py-3 px-4 border-bottom">
+                <h6 class="mb-0"><i class="bi bi-file-text me-2 text-primary"></i>Pending Prescriptions</h6>
+                <a href="{{ url_for('pharmacy.prescriptions') }}" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table data-table mb-0">
+                        <thead><tr><th>Rx #</th><th>Patient</th><th>Doctor</th><th>Date</th><th>Action</th></tr></thead>
+                        <tbody>
+                            {% for rx in pending_rx %}
+                            <tr>
+                                <td>{{ rx.prescription_number }}</td>
+                                <td>{{ rx.patient.get_full_name() }}</td>
+                                <td>Dr. {{ rx.doctor.user.last_name }}</td>
+                                <td>{{ rx.created_at.strftime('%b %d') }}</td>
+                                <td><a href="{{ url_for('pharmacy.dispense', prescription_id=rx.id) }}" class="btn btn-sm btn-success">Dispense</a></td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="5" class="text-center py-4 text-muted">No pending prescriptions</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="dashboard-card">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center py-3 px-4 border-bottom">
+                <h6 class="mb-0"><i class="bi bi-exclamation-triangle me-2 text-danger"></i>Low Stock Alerts</h6>
+                <a href="{{ url_for('pharmacy.inventory') }}" class="btn btn-sm btn-outline-danger">View All</a>
+            </div>
+            <div class="card-body">
+                {% for item in low_stock_items %}
+                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                    <div><span class="fw-medium">{{ item.medication.name }}</span><br><small class="text-muted">{{ item.medication.form }} {{ item.medication.strength }}</small></div>
+                    <span class="badge bg-danger">{{ item.quantity_available|int }} {{ item.unit }}</span>
+                </div>
+                {% else %}
+                <p class="text-muted text-center mb-0">No low stock items</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

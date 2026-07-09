@@ -1,0 +1,100 @@
+{% extends "dashboard_base.html" %}
+
+{% block title %}My Profile{% endblock %}
+{% block profile_active %}active{% endblock %}
+
+{% block dashboard_content %}
+<div class="row">
+    <div class="col-lg-4">
+        <div class="dashboard-card">
+            <div class="card-body text-center py-4">
+                <img src="{{ url_for('static', filename='uploads/avatars/' + current_user.avatar) }}"
+                     class="rounded-circle mb-3" style="width:120px;height:120px;object-fit:cover;"
+                     onerror="this.src='https://via.placeholder.com/120'" alt="Avatar">
+                <h5 class="mb-1">{{ current_user.get_full_name() }}</h5>
+                <p class="text-muted mb-0">{{ current_user.role|title }}</p>
+                <p class="text-muted small">{{ current_user.email }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-8">
+        <div class="dashboard-card">
+            <div class="card-header bg-white py-3 px-4 border-bottom">
+                <h6 class="mb-0">Edit Profile</h6>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('auth.profile') }}" enctype="multipart/form-data">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">First Name</label>
+                            <input type="text" class="form-control" name="first_name" value="{{ current_user.first_name }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Last Name</label>
+                            <input type="text" class="form-control" name="last_name" value="{{ current_user.last_name }}">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" name="email" value="{{ current_user.email }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Phone</label>
+                            <input type="tel" class="form-control" name="phone" value="{{ current_user.phone or '' }}">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Timezone</label>
+                            <select class="form-select" name="timezone">
+                                <option value="UTC" {{ 'selected' if current_user.timezone == 'UTC' else '' }}>UTC</option>
+                                <option value="America/New_York" {{ 'selected' if current_user.timezone == 'America/New_York' else '' }}>Eastern Time</option>
+                                <option value="America/Chicago" {{ 'selected' if current_user.timezone == 'America/Chicago' else '' }}>Central Time</option>
+                                <option value="America/Denver" {{ 'selected' if current_user.timezone == 'America/Denver' else '' }}>Mountain Time</option>
+                                <option value="America/Los_Angeles" {{ 'selected' if current_user.timezone == 'America/Los_Angeles' else '' }}>Pacific Time</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Language</label>
+                            <select class="form-select" name="language">
+                                <option value="en" {{ 'selected' if current_user.language == 'en' else '' }}>English</option>
+                                <option value="es" {{ 'selected' if current_user.language == 'es' else '' }}>Spanish</option>
+                                <option value="fr" {{ 'selected' if current_user.language == 'fr' else '' }}>French</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Avatar</label>
+                        <input type="file" class="form-control" name="avatar" accept="image/*">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="dashboard-card mt-3">
+            <div class="card-header bg-white py-3 px-4 border-bottom">
+                <h6 class="mb-0">Change Password</h6>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('auth.change_password') }}">
+                    <div class="mb-3">
+                        <label class="form-label">Current Password</label>
+                        <input type="password" class="form-control" name="current_password" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">New Password</label>
+                        <input type="password" class="form-control" name="new_password" required minlength="8">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Confirm New Password</label>
+                        <input type="password" class="form-control" name="confirm_password" required minlength="8">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Change Password</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,79 @@
+{% extends "dashboard_base.html" %}
+
+{% block title %}Nursing{% endblock %}
+{% block dashboard_active %}active{% endblock %}
+{% block dashboard_url %}{{ url_for('nursing.dashboard') }}{% endblock %}
+
+{% block role_menu %}
+<div class="menu-header">Patient Care</div>
+<a class="nav-link" href="{{ url_for('nursing.patients') }}"><i class="bi bi-people"></i><span>My Patients</span></a>
+<a class="nav-link" href="{{ url_for('nursing.medication_admin') }}"><i class="bi bi-capsule"></i><span>Medication Admin</span></a>
+<a class="nav-link" href="{{ url_for('nursing.care_plans') }}"><i class="bi bi-clipboard-heart"></i><span>Care Plans</span></a>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div><h4 class="mb-1">Nursing Dashboard</h4><p class="text-muted mb-0">Patient care management</p></div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="dashboard-card stat-card info">
+            <div class="d-flex align-items-center gap-3">
+                <div class="stat-icon info"><i class="bi bi-people"></i></div>
+                <div><h3 class="stat-value">{{ assigned_patients }}</h3><p class="stat-label">Assigned Patients</p></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="dashboard-card stat-card warning">
+            <div class="d-flex align-items-center gap-3">
+                <div class="stat-icon warning"><i class="bi bi-capsule"></i></div>
+                <div><h3 class="stat-value">{{ med_schedules }}</h3><p class="stat-label">Medication Schedules</p></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="dashboard-card stat-card danger">
+            <div class="d-flex align-items-center gap-3">
+                <div class="stat-icon danger"><i class="bi bi-exclamation-triangle"></i></div>
+                <div><h3 class="stat-value">{{ critical_alerts }}</h3><p class="stat-label">Critical Alerts</p></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-12">
+        <div class="dashboard-card">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center py-3 px-4 border-bottom">
+                <h6 class="mb-0"><i class="bi bi-people me-2 text-primary"></i>Today's Assignments</h6>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table data-table mb-0">
+                        <thead><tr><th>Patient</th><th>Room/Bed</th><th>Shift</th><th>Acuity</th><th>Instructions</th><th>Actions</th></tr></thead>
+                        <tbody>
+                            {% for assign in assignments %}
+                            <tr>
+                                <td>{{ assign.patient.get_full_name() }}</td>
+                                <td>{{ assign.room_number or '-' }} / {{ assign.bed_number or '-' }}</td>
+                                <td><span class="badge bg-info">{{ assign.shift|title }}</span></td>
+                                <td><span class="badge bg-{{ 'danger' if assign.acuity_level == 'critical' else 'warning' if assign.acuity_level == 'high' else 'success' }}">{{ assign.acuity_level|title }}</span></td>
+                                <td>{{ assign.special_instructions[:50] if assign.special_instructions else '-' }}</td>
+                                <td>
+                                    <a href="{{ url_for('nursing.record_vitals', patient_id=assign.patient_id) }}" class="btn btn-sm btn-outline-primary">Vitals</a>
+                                    <a href="{{ url_for('nursing.nursing_notes', patient_id=assign.patient_id) }}" class="btn btn-sm btn-outline-secondary">Notes</a>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="6" class="text-center py-4 text-muted">No assignments today</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

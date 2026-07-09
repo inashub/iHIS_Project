@@ -1,0 +1,101 @@
+{% extends "dashboard_base.html" %}
+
+{% block title %}Dentistry{% endblock %}
+{% block dashboard_active %}active{% endblock %}
+{% block dashboard_url %}{{ url_for('dentistry.dashboard') }}{% endblock %}
+
+{% block role_menu %}
+<div class="menu-header">Dental</div>
+<a class="nav-link" href="{{ url_for('dentistry.patients') }}"><i class="bi bi-people"></i><span>Patients</span></a>
+<a class="nav-link" href="{{ url_for('dentistry.procedures') }}"><i class="bi bi-clipboard-check"></i><span>Procedures</span></a>
+<a class="nav-link" href="{{ url_for('dentistry.orthodontics') }}"><i class="bi bi-bezier2"></i><span>Orthodontics</span></a>
+<div class="menu-header">Tools</div>
+<a class="nav-link" href="#"><i class="bi bi-robot"></i><span>AI Dental Assistant</span></a>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div><h4 class="mb-1">Dentistry Dashboard</h4><p class="text-muted mb-0">Dental clinic management</p></div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="dashboard-card stat-card info">
+            <div class="d-flex align-items-center gap-3">
+                <div class="stat-icon info"><i class="bi bi-calendar-check"></i></div>
+                <div><h3 class="stat-value">{{ today_appointments }}</h3><p class="stat-label">Today's Appointments</p></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="dashboard-card stat-card warning">
+            <div class="d-flex align-items-center gap-3">
+                <div class="stat-icon warning"><i class="bi bi-clipboard-check"></i></div>
+                <div><h3 class="stat-value">{{ pending_plans }}</h3><p class="stat-label">Pending Plans</p></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="dashboard-card stat-card accent">
+            <div class="d-flex align-items-center gap-3">
+                <div class="stat-icon accent"><i class="bi bi-bezier2"></i></div>
+                <div><h3 class="stat-value">{{ active_ortho }}</h3><p class="stat-label">Active Ortho Cases</p></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="dashboard-card stat-card success">
+            <div class="d-flex align-items-center gap-3">
+                <div class="stat-icon success"><i class="bi bi-emoji-smile"></i></div>
+                <div><h3 class="stat-value">0</h3><p class="stat-label">Follow-ups</p></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-8">
+        <div class="dashboard-card">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center py-3 px-4 border-bottom">
+                <h6 class="mb-0"><i class="bi bi-clipboard-check me-2 text-primary"></i>Recent Procedures</h6>
+                <a href="{{ url_for('dentistry.procedures') }}" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table data-table mb-0">
+                        <thead><tr><th>Date</th><th>Patient</th><th>Procedure</th><th>Teeth</th><th>Outcome</th></tr></thead>
+                        <tbody>
+                            {% for proc in recent_procedures %}
+                            <tr>
+                                <td>{{ proc.procedure_date.strftime('%b %d') }}</td>
+                                <td>{{ proc.patient.get_full_name() }}</td>
+                                <td>{{ proc.procedure_type|replace('_', ' ')|title }}</td>
+                                <td>{{ proc.teeth_treated or '-' }}</td>
+                                <td><span class="badge bg-{{ 'success' if proc.outcome == 'successful' else 'warning' }}">{{ proc.outcome|title }}</span></td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="5" class="text-center py-4 text-muted">No recent procedures</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="dashboard-card">
+            <div class="card-header bg-white py-3 px-4 border-bottom">
+                <h6 class="mb-0"><i class="bi bi-robot me-2 text-primary"></i>AI Dental Assistant</h6>
+            </div>
+            <div class="card-body">
+                <div class="ai-placeholder">
+                    <i class="bi bi-cpu"></i>
+                    <h6>AI Dental Analysis</h6>
+                    <p class="text-muted small">X-ray analysis, caries detection, and treatment planning assistance.</p>
+                    <span class="badge bg-primary">Coming Soon</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,175 @@
+{% extends "dashboard_base.html" %}
+
+{% block title %}Patient Portal{% endblock %}
+{% block dashboard_active %}active{% endblock %}
+{% block dashboard_url %}{{ url_for('patient.dashboard') }}{% endblock %}
+
+{% block role_menu %}
+<div class="menu-header">My Health</div>
+<a class="nav-link" href="{{ url_for('emr.view_emr', patient_id=patient.id) }}">
+    <i class="bi bi-file-medical"></i>
+    <span>Medical Records</span>
+</a>
+<a class="nav-link" href="#">
+    <i class="bi bi-capsule"></i>
+    <span>Prescriptions</span>
+</a>
+<a class="nav-link" href="#">
+    <i class="bi bi-droplet"></i>
+    <span>Lab Results</span>
+</a>
+<a class="nav-link" href="#">
+    <i class="bi bi-radioactive"></i>
+    <span>Radiology Reports</span>
+</a>
+<div class="menu-header">Services</div>
+<a class="nav-link" href="{{ url_for('appointments.book') }}">
+    <i class="bi bi-calendar-plus"></i>
+    <span>Book Appointment</span>
+</a>
+<a class="nav-link" href="{{ url_for('appointments.list') }}">
+    <i class="bi bi-calendar-check"></i>
+    <span>My Appointments</span>
+</a>
+<a class="nav-link" href="#">
+    <i class="bi bi-chat-dots"></i>
+    <span>Message Doctor</span>
+</a>
+<div class="menu-header">Tools</div>
+<a class="nav-link" href="#">
+    <i class="bi bi-robot"></i>
+    <span>AI Health Insights</span>
+</a>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1">My Health Dashboard</h4>
+        <p class="text-muted mb-0">Welcome, {{ patient.get_full_name() }}</p>
+    </div>
+    <a href="{{ url_for('appointments.book') }}" class="btn btn-primary">
+        <i class="bi bi-calendar-plus me-1"></i> Book Appointment
+    </a>
+</div>
+
+<!-- Quick Stats -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="dashboard-card stat-card info">
+            <div class="d-flex align-items-center gap-3">
+                <div class="stat-icon info"><i class="bi bi-calendar-check"></i></div>
+                <div>
+                    <h3 class="stat-value">{{ upcoming_appointments|length }}</h3>
+                    <p class="stat-label">Upcoming Appointments</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="dashboard-card stat-card success">
+            <div class="d-flex align-items-center gap-3">
+                <div class="stat-icon success"><i class="bi bi-capsule"></i></div>
+                <div>
+                    <h3 class="stat-value">{{ active_medications|length }}</h3>
+                    <p class="stat-label">Active Medications</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="dashboard-card stat-card warning">
+            <div class="d-flex align-items-center gap-3">
+                <div class="stat-icon warning"><i class="bi bi-droplet"></i></div>
+                <div>
+                    <h3 class="stat-value">0</h3>
+                    <p class="stat-label">Pending Lab Results</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="dashboard-card stat-card accent">
+            <div class="d-flex align-items-center gap-3">
+                <div class="stat-icon accent"><i class="bi bi-heart-pulse"></i></div>
+                <div>
+                    <h3 class="stat-value">{{ patient.blood_type or '-' }}</h3>
+                    <p class="stat-label">Blood Type</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <!-- Upcoming Appointments -->
+    <div class="col-lg-7">
+        <div class="dashboard-card">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center py-3 px-4 border-bottom">
+                <h6 class="mb-0"><i class="bi bi-calendar3 me-2 text-primary"></i>Upcoming Appointments</h6>
+                <a href="{{ url_for('appointments.list') }}" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    {% for appt in upcoming_appointments %}
+                    <div class="list-group-item d-flex align-items-center gap-3 py-3">
+                        <div class="bg-primary bg-opacity-10 rounded-3 text-center p-2" style="min-width: 60px;">
+                            <small class="text-primary d-block">{{ appt.scheduled_date.strftime('%b') }}</small>
+                            <strong class="text-primary">{{ appt.scheduled_date.strftime('%d') }}</strong>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="mb-0">{{ appt.reason or appt.appointment_type|title }}</h6>
+                            <small class="text-muted">Dr. {{ appt.doctor.user.last_name }} | {{ appt.scheduled_time.strftime('%H:%M') }}</small>
+                        </div>
+                        <span class="badge bg-{{ 'success' if appt.status == 'confirmed' else 'warning' }}">{{ appt.status|title }}</span>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-calendar-x fs-1"></i>
+                        <p class="mt-2">No upcoming appointments</p>
+                        <a href="{{ url_for('appointments.book') }}" class="btn btn-sm btn-primary">Book Now</a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Medications + AI Insights -->
+    <div class="col-lg-5">
+        <div class="dashboard-card">
+            <div class="card-header bg-white py-3 px-4 border-bottom">
+                <h6 class="mb-0"><i class="bi bi-capsule me-2 text-primary"></i>Active Medications</h6>
+            </div>
+            <div class="card-body">
+                {% for rx in active_medications %}
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="bg-success bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center" style="width:40px;height:40px">
+                        <i class="bi bi-capsule text-success"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h6 class="mb-0">{{ rx.diagnosis or 'Prescription' }}</h6>
+                        <small class="text-muted">{{ rx.start_date.strftime('%b %d, %Y') }}</small>
+                    </div>
+                </div>
+                {% else %}
+                <p class="text-muted text-center mb-0">No active medications</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="dashboard-card mt-3">
+            <div class="card-header bg-white py-3 px-4 border-bottom">
+                <h6 class="mb-0"><i class="bi bi-robot me-2 text-primary"></i>AI Health Insights</h6>
+            </div>
+            <div class="card-body">
+                <div class="ai-placeholder py-4">
+                    <i class="bi bi-cpu"></i>
+                    <h6>Personalized Health Insights</h6>
+                    <p class="text-muted small mb-0">AI-powered analysis of your health data will appear here.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

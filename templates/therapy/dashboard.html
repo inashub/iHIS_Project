@@ -1,0 +1,93 @@
+{% extends "dashboard_base.html" %}
+
+{% block title %}Physical Therapy{% endblock %}
+{% block dashboard_active %}active{% endblock %}
+{% block dashboard_url %}{{ url_for('therapy.dashboard') }}{% endblock %}
+
+{% block role_menu %}
+<div class="menu-header">Rehabilitation</div>
+<a class="nav-link" href="{{ url_for('therapy.patients') }}"><i class="bi bi-people"></i><span>Patients</span></a>
+<a class="nav-link" href="{{ url_for('therapy.plans') }}"><i class="bi bi-file-medical"></i><span>Therapy Plans</span></a>
+<a class="nav-link" href="{{ url_for('therapy.exercises') }}"><i class="bi bi-person-walking"></i><span>Exercise Library</span></a>
+<a class="nav-link" href="{{ url_for('therapy.progress') }}"><i class="bi bi-graph-up"></i><span>Progress Tracking</span></a>
+<div class="menu-header">Tools</div>
+<a class="nav-link" href="#"><i class="bi bi-robot"></i><span>AI Rehab Assistant</span></a>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div><h4 class="mb-1">Physical Therapy Dashboard</h4><p class="text-muted mb-0">Rehabilitation management</p></div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="dashboard-card stat-card info">
+            <div class="d-flex align-items-center gap-3">
+                <div class="stat-icon info"><i class="bi bi-calendar-check"></i></div>
+                <div><h3 class="stat-value">{{ today_sessions }}</h3><p class="stat-label">Today's Sessions</p></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="dashboard-card stat-card success">
+            <div class="d-flex align-items-center gap-3">
+                <div class="stat-icon success"><i class="bi bi-file-medical"></i></div>
+                <div><h3 class="stat-value">{{ active_plans }}</h3><p class="stat-label">Active Plans</p></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="dashboard-card stat-card danger">
+            <div class="d-flex align-items-center gap-3">
+                <div class="stat-icon danger"><i class="bi bi-exclamation-triangle"></i></div>
+                <div><h3 class="stat-value">{{ high_risk }}</h3><p class="stat-label">High Risk Patients</p></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-8">
+        <div class="dashboard-card">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center py-3 px-4 border-bottom">
+                <h6 class="mb-0"><i class="bi bi-calendar-check me-2 text-primary"></i>Recent Sessions</h6>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table data-table mb-0">
+                        <thead><tr><th>Date</th><th>Patient</th><th>Type</th><th>Pain Before/After</th><th>Status</th></tr></thead>
+                        <tbody>
+                            {% for session in recent_sessions %}
+                            <tr>
+                                <td>{{ session.session_date.strftime('%b %d') }}</td>
+                                <td>{{ session.patient.get_full_name() }}</td>
+                                <td>{{ session.session_type|title }}</td>
+                                <td>{{ session.pain_level_before or '-' }} / {{ session.pain_level_after or '-' }}</td>
+                                <td><span class="badge bg-{{ 'success' if session.attendance_status == 'completed' else 'warning' }}">{{ session.attendance_status|title }}</span></td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="5" class="text-center py-4 text-muted">No recent sessions</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="dashboard-card">
+            <div class="card-header bg-white py-3 px-4 border-bottom">
+                <h6 class="mb-0"><i class="bi bi-robot me-2 text-primary"></i>AI Rehab Assistant</h6>
+            </div>
+            <div class="card-body">
+                <div class="ai-placeholder">
+                    <i class="bi bi-cpu"></i>
+                    <h6>AI Rehabilitation</h6>
+                    <p class="text-muted small">Progress analysis, exercise recommendations, and recovery prediction.</p>
+                    <span class="badge bg-primary">Coming Soon</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

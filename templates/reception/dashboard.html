@@ -1,0 +1,89 @@
+{% extends "dashboard_base.html" %}
+
+{% block title %}Reception{% endblock %}
+{% block dashboard_active %}active{% endblock %}
+{% block dashboard_url %}{{ url_for('reception.dashboard') }}{% endblock %}
+
+{% block role_menu %}
+<div class="menu-header">Front Desk</div>
+<a class="nav-link" href="{{ url_for('reception.schedule') }}"><i class="bi bi-calendar-plus"></i><span>Schedule Appointment</span></a>
+<a class="nav-link" href="{{ url_for('reception.register_patient') }}"><i class="bi bi-person-plus"></i><span>Register Patient</span></a>
+<a class="nav-link" href="{{ url_for('reception.appointments') }}"><i class="bi bi-calendar-check"></i><span>Appointments</span></a>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div><h4 class="mb-1">Reception Dashboard</h4><p class="text-muted mb-0">Front desk operations</p></div>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('reception.schedule') }}" class="btn btn-primary"><i class="bi bi-calendar-plus me-1"></i>Schedule</a>
+        <a href="{{ url_for('reception.register_patient') }}" class="btn btn-success"><i class="bi bi-person-plus me-1"></i>Register</a>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="dashboard-card stat-card info">
+            <div class="d-flex align-items-center gap-3">
+                <div class="stat-icon info"><i class="bi bi-calendar-check"></i></div>
+                <div><h3 class="stat-value">{{ daily_appointments }}</h3><p class="stat-label">Today's Appointments</p></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="dashboard-card stat-card warning">
+            <div class="d-flex align-items-center gap-3">
+                <div class="stat-icon warning"><i class="bi bi-clock"></i></div>
+                <div><h3 class="stat-value">{{ waiting }}</h3><p class="stat-label">Waiting Patients</p></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="dashboard-card stat-card success">
+            <div class="d-flex align-items-center gap-3">
+                <div class="stat-icon success"><i class="bi bi-check-circle"></i></div>
+                <div><h3 class="stat-value">{{ checked_in }}</h3><p class="stat-label">Checked In</p></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-12">
+        <div class="dashboard-card">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center py-3 px-4 border-bottom">
+                <h6 class="mb-0"><i class="bi bi-calendar-check me-2 text-primary"></i>Today's Appointments</h6>
+                <a href="{{ url_for('reception.appointments') }}" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table data-table mb-0">
+                        <thead><tr><th>Time</th><th>Patient</th><th>Doctor</th><th>Type</th><th>Status</th><th>Action</th></tr></thead>
+                        <tbody>
+                            {% for appt in todays_appointments %}
+                            <tr>
+                                <td>{{ appt.scheduled_time.strftime('%H:%M') }}</td>
+                                <td>{{ appt.patient.get_full_name() }}</td>
+                                <td>Dr. {{ appt.doctor.user.last_name }}</td>
+                                <td>{{ appt.appointment_type|replace('_', ' ')|title }}</td>
+                                <td><span class="badge bg-{{ 'success' if appt.status == 'checked_in' else 'info' if appt.status == 'scheduled' else 'secondary' }}">{{ appt.status|title }}</span></td>
+                                <td>
+                                    {% if appt.status == 'scheduled' %}
+                                    <form method="POST" action="{{ url_for('reception.checkin', appointment_id=appt.id) }}" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-success">Check In</button>
+                                    </form>
+                                    {% else %}
+                                    <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="6" class="text-center py-4 text-muted">No appointments today</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

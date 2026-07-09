@@ -1,0 +1,101 @@
+{% extends "dashboard_base.html" %}
+
+{% block title %}Laboratory{% endblock %}
+{% block dashboard_active %}active{% endblock %}
+{% block dashboard_url %}{{ url_for('laboratory.dashboard') }}{% endblock %}
+
+{% block role_menu %}
+<div class="menu-header">Lab Operations</div>
+<a class="nav-link" href="{{ url_for('laboratory.orders') }}">
+    <i class="bi bi-droplet"></i><span>Lab Orders</span>
+</a>
+<a class="nav-link" href="{{ url_for('laboratory.test_catalog') }}">
+    <i class="bi bi-list-check"></i><span>Test Catalog</span>
+</a>
+<a class="nav-link" href="{{ url_for('laboratory.quality_control') }}">
+    <i class="bi bi-shield-check"></i><span>Quality Control</span>
+</a>
+<div class="menu-header">Tools</div>
+<a class="nav-link" href="#">
+    <i class="bi bi-robot"></i><span>AI Lab Interpretation</span>
+</a>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div><h4 class="mb-1">Laboratory Dashboard</h4><p class="text-muted mb-0">Clinical laboratory management</p></div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="dashboard-card stat-card warning">
+            <div class="d-flex align-items-center gap-3">
+                <div class="stat-icon warning"><i class="bi bi-droplet"></i></div>
+                <div><h3 class="stat-value">{{ pending_orders }}</h3><p class="stat-label">Pending Orders</p></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="dashboard-card stat-card success">
+            <div class="d-flex align-items-center gap-3">
+                <div class="stat-icon success"><i class="bi bi-check-circle"></i></div>
+                <div><h3 class="stat-value">{{ completed_today }}</h3><p class="stat-label">Completed Today</p></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="dashboard-card stat-card danger">
+            <div class="d-flex align-items-center gap-3">
+                <div class="stat-icon danger"><i class="bi bi-exclamation-triangle"></i></div>
+                <div><h3 class="stat-value">{{ critical_values }}</h3><p class="stat-label">Critical Values</p></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-8">
+        <div class="dashboard-card">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center py-3 px-4 border-bottom">
+                <h6 class="mb-0"><i class="bi bi-droplet me-2 text-primary"></i>Pending Orders</h6>
+                <a href="{{ url_for('laboratory.orders') }}" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table data-table mb-0">
+                        <thead><tr><th>Order #</th><th>Patient</th><th>Priority</th><th>Status</th><th>Date</th></tr></thead>
+                        <tbody>
+                            {% for order in pending_orders_list %}
+                            <tr>
+                                <td>{{ order.order_number }}</td>
+                                <td>{{ order.patient.get_full_name() }}</td>
+                                <td><span class="badge bg-{{ 'danger' if order.priority == 'stat' else 'warning' if order.priority == 'urgent' else 'info' }}">{{ order.priority|title }}</span></td>
+                                <td><span class="badge bg-secondary">{{ order.status|title }}</span></td>
+                                <td>{{ order.ordered_at.strftime('%b %d') }}</td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="5" class="text-center py-4 text-muted">No pending orders</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="dashboard-card">
+            <div class="card-header bg-white py-3 px-4 border-bottom">
+                <h6 class="mb-0"><i class="bi bi-robot me-2 text-primary"></i>AI Lab Interpretation</h6>
+            </div>
+            <div class="card-body">
+                <div class="ai-placeholder">
+                    <i class="bi bi-cpu"></i>
+                    <h6>AI Lab Assistant</h6>
+                    <p class="text-muted small">Automated result interpretation and critical value flagging.</p>
+                    <span class="badge bg-primary">Coming Soon</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

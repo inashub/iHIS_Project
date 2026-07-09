@@ -1,0 +1,203 @@
+{% extends "dashboard_base.html" %}
+
+{% block title %}Doctor Dashboard{% endblock %}
+{% block dashboard_active %}active{% endblock %}
+{% block dashboard_url %}{{ url_for('doctor.dashboard') }}{% endblock %}
+
+{% block role_menu %}
+<div class="menu-header">Clinical</div>
+<a class="nav-link {% block patients_active %}{% endblock %}" href="{{ url_for('doctor.patients') }}">
+    <i class="bi bi-people"></i>
+    <span>Patients</span>
+</a>
+<a class="nav-link {% block records_active %}{% endblock %}" href="{{ url_for('doctor.medical_records') }}">
+    <i class="bi bi-file-medical"></i>
+    <span>Medical Records</span>
+</a>
+<a class="nav-link {% block prescriptions_active %}{% endblock %}" href="{{ url_for('doctor.prescriptions') }}">
+    <i class="bi bi-capsule"></i>
+    <span>Prescriptions</span>
+</a>
+<a class="nav-link {% block appointments_active %}{% endblock %}" href="{{ url_for('doctor.appointments') }}">
+    <i class="bi bi-calendar-check"></i>
+    <span>Appointments</span>
+</a>
+
+<div class="menu-header">Orders</div>
+<a class="nav-link" href="#">
+    <i class="bi bi-droplet"></i>
+    <span>Lab Orders</span>
+</a>
+<a class="nav-link" href="#">
+    <i class="bi bi-radioactive"></i>
+    <span>Imaging Orders</span>
+</a>
+<a class="nav-link" href="#">
+    <i class="bi bi-arrow-left-right"></i>
+    <span>Referrals</span>
+</a>
+
+<div class="menu-header">Tools</div>
+<a class="nav-link" href="#">
+    <i class="bi bi-robot"></i>
+    <span>AI Clinical Assistant</span>
+</a>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1">Doctor Dashboard</h4>
+        <p class="text-muted mb-0">Welcome back, Dr. {{ current_user.last_name }}</p>
+    </div>
+    <div>
+        <a href="{{ url_for('doctor.patients') }}" class="btn btn-primary">
+            <i class="bi bi-search me-1"></i> Search Patient
+        </a>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="dashboard-card stat-card success">
+            <div class="d-flex align-items-center gap-3">
+                <div class="stat-icon success">
+                    <i class="bi bi-calendar-check"></i>
+                </div>
+                <div>
+                    <h3 class="stat-value">{{ today_appointments }}</h3>
+                    <p class="stat-label">Today's Appointments</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="dashboard-card stat-card info">
+            <div class="d-flex align-items-center gap-3">
+                <div class="stat-icon info">
+                    <i class="bi bi-people"></i>
+                </div>
+                <div>
+                    <h3 class="stat-value">{{ total_patients }}</h3>
+                    <p class="stat-label">Total Patients</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="dashboard-card stat-card warning">
+            <div class="d-flex align-items-center gap-3">
+                <div class="stat-icon warning">
+                    <i class="bi bi-file-earmark-text"></i>
+                </div>
+                <div>
+                    <h3 class="stat-value">{{ pending_reports }}</h3>
+                    <p class="stat-label">Pending Reports</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="dashboard-card stat-card danger">
+            <div class="d-flex align-items-center gap-3">
+                <div class="stat-icon danger">
+                    <i class="bi bi-exclamation-triangle"></i>
+                </div>
+                <div>
+                    <h3 class="stat-value">0</h3>
+                    <p class="stat-label">Critical Alerts</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <!-- Upcoming Appointments -->
+    <div class="col-lg-8">
+        <div class="dashboard-card">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center py-3 px-4 border-bottom">
+                <h6 class="mb-0"><i class="bi bi-calendar3 me-2 text-primary"></i>Upcoming Appointments</h6>
+                <a href="{{ url_for('doctor.appointments') }}" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table data-table mb-0">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Patient</th>
+                                <th>Type</th>
+                                <th>Reason</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for appt in upcoming_appointments %}
+                            <tr>
+                                <td>{{ appt.scheduled_date.strftime('%b %d') }} {{ appt.scheduled_time.strftime('%H:%M') }}</td>
+                                <td>{{ appt.patient.get_full_name() }}</td>
+                                <td><span class="badge bg-info">{{ appt.appointment_type|replace('_', ' ')|title }}</span></td>
+                                <td>{{ appt.reason[:50] if appt.reason else '-' }}</td>
+                                <td><span class="badge bg-{{ 'success' if appt.status == 'completed' else 'warning' if appt.status == 'scheduled' else 'secondary' }}">{{ appt.status|title }}</span></td>
+                                <td>
+                                    <a href="{{ url_for('doctor.patient_detail', patient_id=appt.patient_id) }}" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center py-4 text-muted">No upcoming appointments</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Assistant Placeholder -->
+    <div class="col-lg-4">
+        <div class="dashboard-card">
+            <div class="card-header bg-white py-3 px-4 border-bottom">
+                <h6 class="mb-0"><i class="bi bi-robot me-2 text-primary"></i>AI Clinical Assistant</h6>
+            </div>
+            <div class="card-body">
+                <div class="ai-placeholder">
+                    <i class="bi bi-cpu"></i>
+                    <h6>AI Module Ready</h6>
+                    <p class="text-muted small">Clinical decision support, diagnosis suggestions, and prescription checking will be available here.</p>
+                    <span class="badge bg-primary">Coming Soon</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Patients -->
+        <div class="dashboard-card mt-3">
+            <div class="card-header bg-white py-3 px-4 border-bottom">
+                <h6 class="mb-0"><i class="bi bi-clock-history me-2 text-primary"></i>Recent Patients</h6>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    {% for patient in recent_patients[:5] %}
+                    <a href="{{ url_for('doctor.patient_detail', patient_id=patient.id) }}" class="list-group-item list-group-item-action d-flex align-items-center gap-3 py-3">
+                        <div class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center" style="width:40px;height:40px">
+                            <span class="text-primary fw-bold">{{ patient.first_name[0] }}{{ patient.last_name[0] }}</span>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="mb-0">{{ patient.get_full_name() }}</h6>
+                            <small class="text-muted">{{ patient.patient_id }} | {{ patient.gender|title }} | {{ patient.get_age() }} yrs</small>
+                        </div>
+                        <i class="bi bi-chevron-right text-muted"></i>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

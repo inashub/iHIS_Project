@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block sidebar_menu %}
+<!-- Dashboard -->
+<a class="nav-link {% block dashboard_active %}{% endblock %}" href="{% block dashboard_url %}{{ url_for('main.index') }}{% endblock %}">
+    <i class="bi bi-speedometer2"></i>
+    <span>Dashboard</span>
+</a>
+
+{% block role_menu %}{% endblock %}
+
+<!-- Common Menu Items -->
+<div class="menu-header">Communication</div>
+<a class="nav-link" href="#">
+    <i class="bi bi-chat-dots"></i>
+    <span>Messages</span>
+</a>
+<a class="nav-link" href="#">
+    <i class="bi bi-bell"></i>
+    <span>Notifications</span>
+</a>
+
+<div class="menu-header">General</div>
+<a class="nav-link {% block profile_active %}{% endblock %}" href="{{ url_for('auth.profile') }}">
+    <i class="bi bi-person"></i>
+    <span>My Profile</span>
+</a>
+<a class="nav-link" href="#">
+    <i class="bi bi-gear"></i>
+    <span>Settings</span>
+</a>
+<a class="nav-link" href="#">
+    <i class="bi bi-question-circle"></i>
+    <span>Help & Support</span>
+</a>
+{% endblock %}
+
+{% block content %}
+{% block dashboard_content %}{% endblock %}
+{% endblock %}
